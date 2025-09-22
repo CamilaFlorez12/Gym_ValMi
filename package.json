@@ -1,0 +1,25 @@
+{
+  "name": "gym_valmi",
+  "version": "1.0.0",
+  "description": "Gym encargado de manejo de datos de sus clientes y planes de entrenamineto",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CamilaFlorez12/Gym_ValMi.git"
+  },
+  "keywords": [
+    "gym",
+    "progreso",
+    "clientes",
+    "datos"
+  ],
+  "author": "Camila y Valentina",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CamilaFlorez12/Gym_ValMi/issues"
+  },
+  "homepage": "https://github.com/CamilaFlorez12/Gym_ValMi#readme"
+}
