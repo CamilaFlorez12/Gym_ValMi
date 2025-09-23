@@ -25,7 +25,7 @@ class PlanEntrenamiento {
     }
 
     async renovarPlan(nombreCliente) {
-        //conexion con la conexion en la base de datos y captura de las clases
+        // conexion con la base de datos y captura de las clases
         const db = await conectar();
         const coleccionClientes = db.collection("clientes");
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
@@ -101,6 +101,30 @@ class PlanEntrenamiento {
             }
         );
         console.log(`Plan finalizado ${finalizacion.modifiedCount}`) 
+    }
+}
+
+class CrearPlan{
+    static CrearPlan(tipo,nombreCliente){
+        switch (tipo.toLowerCase()){
+            case "basico":
+                const planBasico = new PlanEntrenamiento("plan básico",5,["perder peso"],"principiante");
+                planBasico.cliente=nombreCliente;
+                return planBasico;
+
+            case "intermedio":
+                const planInteremedio = new PlanEntrenamiento("plan intermedio",10,["aumentar la fuerza","desarrollo muscular"],"intermedio");
+                planInteremedio.cliente = nombreCliente;
+                return planInteremedio;
+
+            case "avanzado":
+                const planAvanzado = new PlanEntrenamiento("plan avanzado",15,["aumentar fuerza","mejorar agilidad y flexibilidad"],"avanzado");
+                planAvanzado.cliente = nombreCliente;
+                return planAvanzado;
+
+            default:
+                throw new Error("Tipo no válido");
+        }
     }
 }
 export default PlanEntrenamiento;
