@@ -34,7 +34,7 @@ class Contrato {
     get precio() {
         return this.#precio;
     }
-
+//crecaion de fecha si no hay
     set fechaInicio(fechaInicio) {
         if (!this.#fechaInicio) {
             this.#fechaInicio = new Date();
@@ -42,7 +42,7 @@ class Contrato {
         }
 
     }
-
+// segun fecha inicio clacula la fecha fin
     set fechaFin(fechaFin) {
         const fin = new Date(this.#fechaInicio);
         fin.setDate(fin.getDate() + this.#duracionSemanas * 7);
@@ -61,7 +61,7 @@ class Contrato {
     set precio(precio) {
         this.#precio = precio;
     }
-
+//creacion automatica del contrato
     async generarAutomaticamente(clienteId, planId) {
         const db = await conectar();
         const coleccionClientes = db.collection("clientes");
@@ -74,7 +74,7 @@ class Contrato {
             throw new Error("El cliente o el plan no existen");
         }
 
-        const creacionContrato = await db.collection("contratos").insertOne({
+        await db.collection("contratos").insertOne({
             cliente: cliente._id,
             plan: plan._id,
             condiciones: this.#condiciones,
@@ -86,7 +86,7 @@ class Contrato {
         console.log("Contrato generado exitosamente");
         return true;
     };
-
+//renovacion del contrato
     async renovar(contratoId) {
         const db = await conectar();
         const coleccionContratos = db.collection("contratos");
@@ -107,7 +107,7 @@ class Contrato {
                 const nuevaFechaInicio = new Date();
                 const nuevaFechaFin = new Date(nuevaFechaInicio);
                 nuevaFechaFin.setDate(nuevaFechaInicio.getDate() + this.#duracionSemanas * 7);
-                const renovacion = await coleccionContratos.updateOne(
+                await coleccionContratos.updateOne(
                     { _id: new ObjectId(contratoId) },
                     {
                         $set: {
@@ -125,11 +125,12 @@ class Contrato {
             return renovar;
         } catch (error) {
             console.log("Error al renovar el contrato:", error);
+            return false;
         } finally {
             await session.endSession();
         }
     }
-
+//cancelacion del contrato
     async cancelar(contratoId) {
         const db = await conectar();
         const coleccionContratos = db.collection("contratos");
@@ -147,7 +148,7 @@ class Contrato {
                     { contratoId: contrato._id }, { session }
                 )
                 await coleccionContratos.updateOne(
-                    { _id: new ObjectId(contratoId) },
+                    { _id: contrato._id},
                     {
                         $set: {
                             fechaFin: new Date(),
@@ -161,17 +162,17 @@ class Contrato {
             return true;
         } catch (error) {
             console.error("Error al cancelar contrato:", error);
+            return false
 
         } finally {
             await session.endSession();
         }
     }
 
-
+//finalizacion del contrato
     async finalizar(contratoId) {
         const db = await conectar();
         const coleccionContratos = db.collection("contratos");
-        const coleccionSeguimientos = db.collection("seguimientos");
 
         const session = cliente.startSession();
         try {
@@ -184,7 +185,7 @@ class Contrato {
                     { contratoId: contrato._id }, { session }
                 )
                 await coleccionContratos.updateOne(
-                    { _id: new ObjectId(contratoId) },
+                    { _id: contrato._id },
                     {
                         $set: {
                             fechaFin: this.#fechaFin,
@@ -198,6 +199,7 @@ class Contrato {
             return true;
         } catch (error) {
             console.log("Error al finalizar contrato:",error);
+            return false
         }finally{
             await session.endSession();
         }
