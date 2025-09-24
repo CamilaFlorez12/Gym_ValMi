@@ -1,5 +1,5 @@
-import { clientes } from "./clientes.js";
 //conexión con otra carpeta que tiene la conexión con la base de datos
+import { ObjectId } from "mongodb";
 import { conectar } from "./persistenciaArchivos.js";
 
 class PlanEntrenamiento {
@@ -9,7 +9,6 @@ class PlanEntrenamiento {
         this.#duracionSemanas = duracionSemanas;
         this.metas = metas;
         this.nivel = nivel;
-        this.cliente = null;
         this.estado = estado
 
     }
@@ -24,102 +23,81 @@ class PlanEntrenamiento {
         this.#duracionSemanas = duracion;
     }
 
-    async renovarPlan(nombreCliente) {
+    async renovarPlan(planEntrenamientoId) {
         // conexion con la base de datos y captura de las clases
         const db = await conectar();
-        const coleccionClientes = db.collection("clientes");
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
-
-        //busqueda de la base de datos clientes para validar que exista o que ya haya creado un plan
-
-        const cliente = await coleccionClientes.findOne({nombre:nombreCliente});
-
-        if(!cliente){
-            throw new Error("El cliente no existe")
-        }
         
         //actualizacion del plan
         const actualizacion = await coleccionPlanesEntrenamiento.updateOne(
-            {cliente:nombreCliente},
+            {_id: new ObjectId(planEntrenamientoId)},
         {
             $set:{
                 nombre:this.nombre,
             duracionSemanas:this.duracionSemanas,
             metas:this.metas,
             nivel:this.nivel,
-            cliente:nombreCliente
+            estado:"activo"
             },
         }
         
     );
-    console.log(`Plan actualizado ${actualizacion.modifiedCount}`)
+    console.log("Plan renovado exitosamente");
+    return actualizacion;
     }
 
-    async cancelarPlan(nombreCliente){
+    async cancelarPlan(planEntrenamientoId){
         const db= await conectar();
-        const coleccionClientes = db.collection("clientes");
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
         
-        //busqueda de la base de datos clientes para validar que exista o que ya haya creado un plan
-
-        const cliente = await coleccionClientes.findOne({nombre:nombreCliente});
-         if(!cliente){
-            throw new Error("El cliente no existe")
-        }
-
         //cancelacion del plan de entrenamiento
 
         const cancelacion= await coleccionPlanesEntrenamiento.updateOne(
-            {cliente:nombreCliente},
+            {_id:new ObjectId(planEntrenamientoId)},
             {
                 $set:{
                     estado:"cancelado"
                 }
             }
         );
-        console.log(`Plan cancelado ${cancelacion.modifiedCount}`);
+        console.log("Plan cancelado exitosamnte");
+        return cancelacion
     }
 
-    async finalizarPlan(nombreCliente){
+    async finalizarPlan(planEntrenamientoId){
         const db= await conectar();
-        const coleccionClientes = db.collection("clientes");
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
-         //busqueda de la base de datos clientes para validar que exista o que ya haya creado un plan
-
-        const cliente = await coleccionClientes.findOne({nombre:nombreCliente});
-         if(!cliente){
-            throw new Error("El cliente no existe")
-        }
 
         //finalizacion del plan 
         const finalizacion= await coleccionPlanesEntrenamiento.updateOne(
-            {cliente:nombreCliente},
+            {_id: new ObjectId(planEntrenamientoId)},
             {
                 $set:{
-                    estado:"Finalizado"
+                    estado:"finalizado"
                 }
             }
         );
-        console.log(`Plan finalizado ${finalizacion.modifiedCount}`) 
+        console.log("Plan finalizado con éxito");
+        return finalizacion 
     }
 }
 
 class CrearPlan{
-    static CrearPlan(tipo,nombreCliente){
+    static CrearPlan(tipo,clienteId){
         switch (tipo.toLowerCase()){
             case "basico":
                 const planBasico = new PlanEntrenamiento("plan básico",5,["perder peso"],"principiante");
-                planBasico.cliente=nombreCliente;
+                planBasico.clienteId=clienteId;
                 return planBasico;
 
             case "intermedio":
-                const planInteremedio = new PlanEntrenamiento("plan intermedio",10,["aumentar la fuerza","desarrollo muscular"],"intermedio");
-                planInteremedio.cliente = nombreCliente;
-                return planInteremedio;
+                const planIntermedio = new PlanEntrenamiento("plan intermedio",10,["aumentar la fuerza","desarrollo muscular"],"intermedio");
+                planIntermedio.clienteId = clienteId;
+                return planIntermedio;
 
             case "avanzado":
                 const planAvanzado = new PlanEntrenamiento("plan avanzado",15,["aumentar fuerza","mejorar agilidad y flexibilidad"],"avanzado");
-                planAvanzado.cliente = nombreCliente;
+                planAvanzado.clienteId = clienteId;
                 return planAvanzado;
 
             default:
@@ -128,3 +106,4 @@ class CrearPlan{
     }
 }
 export default PlanEntrenamiento;
+export {CrearPlan};

@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 export function gestionClientes(db) {
     const clientes = db.collection("clientes");
-    const planes = db.collection("planes");
+    const planes = db.collection("planEntrenamiento");
     const contratos = db.collection("contratos");
     const seguimientos = db.collection("seguimientos");
 
