@@ -28,18 +28,32 @@ class GestionFinanciero{
         if(monto < 0){
             throw new Error("El ingreso no puede ser negativo");
         }
-        this.ingresos+=monto
+        this.#ingresos+=monto
+
+        const db = conectar();
+        await db.collection("finanzas".insertOne({
+            tipo:"ingreso",
+            monto,
+            fecha:new Date()
+        }))
     }
 
     async actualizarEgresos(monto){
         if(monto < 0){
             throw new Error("El egreso no puede ser negativo");
         }
-        this.egresos+=monto
+        this.#egresos+=monto
+
+        const db = conectar();
+        await db.collection("finanzas".insertOne({
+            tipo:"egreso",
+            monto,
+            fecha:new Date()
+        }))
     }
 }
 
-class Mensualidades{
+class Mensualidades extends GestionFinanciero{
     #nombreCliente
     #plan
     #precio
@@ -65,16 +79,15 @@ class Mensualidades{
         const db = await conectar();
         const coleccionContrato = db.collection("contratos");
 
-        const cliente = await coleccionContrato.find({cliente:this.nombreCliente}).toArray();
-
-        coleccionContrato.aggregate([
-            {$match:{nombre:cliente}},
+        const ingresos = await coleccionContrato.aggregate([
+            {$match:{cliente:this.#nombreCliente}},
             {$group:{
-                _id:"$precio",
-                total:{$sum:this.#precio}
+                _id:"$cliente",
+                total:{$sum:"$precio"}
             }}
-        ])
+        ]).toArray();
+
+        return ingresos
 
     }
-    }
-
+}
