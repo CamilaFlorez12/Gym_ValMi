@@ -1,4 +1,4 @@
-import { conectar } from "./persistenciaArchivos.js";
+import { cliente, conectar } from "./persistenciaArchivos.js";
 import { ObjectId } from "mongodb";
 import dayjs from "dayjs";
 

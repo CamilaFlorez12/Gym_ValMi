@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 
 const uri = "mongodb://localhost:27017";
-const cliente = new MongoClient(uri);
+export const cliente = new MongoClient(uri);
 const dbName = "Gym_ValMi";
 
 export async function conectar() {

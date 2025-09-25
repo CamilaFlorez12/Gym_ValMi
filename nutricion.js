@@ -1,55 +1,66 @@
-import { conectar } from "./persistenciaArchivos.js";
-import { seguimiento } from "./seguimiento.js";
+import { cliente, conectar } from "./persistenciaArchivos.js";
+import { seguimiento } from "./seguimiento_fisico.js";
 
-class RegistroSemanal {
-    #fecha;
-    constructor(fecha, peso, porcentajeGrasa) {
-        //validacion de peso
-        if (peso <= 0) {
-            throw new Error("El peso debe ser mayor a cero");
-        }
-        this.#fecha = fecha;
-        this.peso = peso;
-        this.porcentajeGrasa = porcentajeGrasa
-    }
-    //para poder acceder al metodo privado de fecha
-    get fecha() {
-        return this.#fecha
-    }
 
-    //funcion para guardar el proceso semanal
-    async guardar(nombreCliente) {
-        const db = await conectar();
-        const coleccionSeguimiento = db.collection("seguimiento");
-
-        const cliente = await coleccionSeguimiento.findOne({ nombre: nombreCliente });
-        if (!cliente) {
-            throw new Error("No existe cliente");
-        }
-
-        //guarda el proceso 
-        const guardar = await coleccionSeguimiento.updateOne(
-            { nombre: nombreCliente },
-            {
-            $push: {                            //se usa push porque su existencia depende de la clase seguimiento
-                    registros: {
-                        fecha: this.#fecha,
-                        peso: this.peso,
-                        porcentajeGrasa: this.porcentajeGrasa
-                    }
-                }
-            }
-        );
-        console.log(`Registro agregado: ${resultado.modifiedCount}`);
-
-    }
-}
-
-class PlanAlimentacion extends RegistroSemanal{
-    constructor(clienteId,planId,descripcion,fecha,peso,porcentajeGrasa){
-        super(fecha,peso,porcentajeGrasa);
+class PlanAlimentacion {
+    #calorias
+    constructor(clienteId, planId, alimento,descripcion, calorias, fecha) {
         this.clienteId = clienteId;
         this.planId = planId;
         this.descripcion = descripcion;
+        this.alimento = alimento;
+        this.#calorias = calorias;
+        this.fecha = fecha;
+    }
+
+    get calorias() {
+        return this.#calorias
+    }
+
+    async registrarAlimeto() {
+        const db = await conectar();
+        const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
+
+        const registro = [
+            {
+                cliente: this.clienteId,
+                plan: this.planId,
+                descripcion: this.descripcion,
+                nombre: this.alimento,
+                calorias: this.#calorias,
+                fecha: this.fecha
+            }
+        ]
+
+        await coleccionSeguimientoNutricional.insertMany(registro)
+    }
+//reporte semanal de aliemtos
+    static async reporteSemanal(clienteId) {
+        const db = await conectar();
+
+        //calculo de la semana(7 dias)
+        const inicioSemana = new Date();
+        inicioSemana.setDate(inicioSemana.getDate() - 7);
+
+        const reporte = await db.collection("seguimientoNutricional").aggregate([
+            {
+                $match: {
+                    cliente: clienteId,
+                    fecha: { $gte: inicioSemana }
+                }
+            },
+            {
+                $group: {
+                    _id: "$cliente",
+                    calorias: { $sum: "$calorias" },
+                    alimentos: { $push: "$alimento" }
+                }
+            }
+        ]).toArray();
+        return reporte
     }
 }
+
+export{PlanAlimentacion}
+
+
