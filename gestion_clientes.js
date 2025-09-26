@@ -57,18 +57,18 @@ export function gestionClientes(db) {
         },
 
 
-        async cancelarPlan(contratoId, session) {
-            const contrato = await contratos.findOne({ _id: new ObjectId(contratoId) }, { session });
-            if (!contrato) throw new Error("Contrato no existe");
+        // async cancelarPlan(contratoId, session) {
+        //     const contrato = await contratos.findOne({ _id: new ObjectId(contratoId) }, { session });
+        //     if (!contrato) throw new Error("Contrato no existe");
 
-            await seguimientos.deleteMany({ contratoId: contrato._id }, { session });
-            await contratos.deleteOne({ _id: contrato._id }, { session });
-            await clientes.updateOne(
-                { _id: contrato.clienteId },
-                { $pull: { contratos: contrato._id } },
-                { session }
-            );
-            return true;
-        },
+        //     await seguimientos.deleteMany({ contratoId: contrato._id }, { session });
+        //     await contratos.deleteOne({ _id: contrato._id }, { session });
+        //     await clientes.updateOne(
+        //         { _id: contrato.clienteId },
+        //         { $pull: { contratos: contrato._id } },
+        //         { session }
+        //     );
+        //     return true;
+        // },
     };
 }

@@ -239,7 +239,7 @@ class Servicios extends GestionFinanciero {
 
 //consulta balance financiero por fecha
 
-async function balanceFinanciero() {
+export async function balanceFinanciero() {
     try {
         const db = await conectar();
         const balance = db.collection("finanzas");
@@ -262,3 +262,5 @@ async function balanceFinanciero() {
         console.log("Error al consultar", error)
     }
 }
+
+export{GestionFinanciero,Mensualidades,SesionesIndividuales,Servicios}

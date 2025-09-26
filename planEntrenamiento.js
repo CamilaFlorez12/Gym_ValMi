@@ -23,7 +23,7 @@ class PlanEntrenamiento {
         this.#duracionSemanas = duracion;
     }
 
-    async renovarPlan(planEntrenamientoId) {
+    static async renovarPlan(planEntrenamientoId,nuevasSemanas) {
         // conexion con la base de datos y captura de las clases
         const db = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
@@ -33,10 +33,7 @@ class PlanEntrenamiento {
             { _id: new ObjectId(planEntrenamientoId) },
             {
                 $set: {
-                    nombre: this.nombre,
-                    duracionSemanas: this.duracionSemanas,
-                    metas: this.metas,
-                    nivel: this.nivel,
+                    duracionSemanas:nuevasSemanas,
                     estado: "activo"
                 },
             }
@@ -46,7 +43,7 @@ class PlanEntrenamiento {
         return actualizacion;
     }
 
-    async cancelarPlan(planEntrenamientoId,clienteId) {
+    static async cancelarPlan(planEntrenamientoId,clienteId) {
         const db = await conectar();
         const session = cliente.startSession();
 
@@ -81,7 +78,7 @@ class PlanEntrenamiento {
             }
         }
 
-    async finalizarPlan(planEntrenamientoId) {
+    static async finalizarPlan(planEntrenamientoId) {
         const db = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
 

@@ -1,5 +1,5 @@
 import { cliente, conectar } from "./persistenciaArchivos.js";
-import { seguimiento } from "./seguimiento_fisico.js";
+import Seguimiento_fisico from "./seguimiento_fisico.js";
 
 
 class PlanAlimentacion {

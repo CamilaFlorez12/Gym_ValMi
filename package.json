@@ -4,7 +4,8 @@
   "description": "Gym encargado de manejo de datos de sus clientes y planes de entrenamineto",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -18,11 +19,13 @@
   ],
   "author": "Camila y Valentina",
   "license": "ISC",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/CamilaFlorez12/Gym_ValMi/issues"
   },
   "homepage": "https://github.com/CamilaFlorez12/Gym_ValMi#readme",
   "dependencies": {
+    "dayjs": "^1.11.18",
     "mongodb": "^6.20.0"
   }
 }
