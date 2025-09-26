@@ -222,4 +222,4 @@ export async function balanceFinanciero() {
     }
 }
 
-export{GestionFinanciero,Mensualidades,SesionesIndividuales,Servicios}
+export{GestionFinanciero,Mensualidades,Servicios}

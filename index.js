@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { conectar } from './persistenciaArchivos.js';
 import { gestionClientes } from './gestion_clientes.js';
-import { GestionFinanciero, Mensualidades, SesionesIndividuales, Servicios, balanceFinanciero } from './gestionFinanciera.js';
+import { GestionFinanciero, Mensualidades, Servicios, balanceFinanciero } from './gestionFinanciera.js';
 import Contrato from './contratos.js';
 import { PlanAlimentacion } from './nutricion.js';
 import { CrearPlan } from './planEntrenamiento.js';
@@ -24,7 +24,7 @@ async function menuGestionClientes(db) {
                     { name: "3.Acualizar Cliente", value: "3" },
                     { name: "4.Eliminar Cliente", value: "4" },
                     { name: "5.Asignar Plan", value: "5" },
-                    { name: "6.Salir" }
+                    { name: "6.Salir",value:"6"}
                 ]
             }])
             switch (accion.opcion) {
