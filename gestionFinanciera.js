@@ -124,48 +124,7 @@ class Mensualidades extends GestionFinanciero {
 
     }
 }
-//subclase sesion individual
-class SesionesIndividuales extends GestionFinanciero {
-    #clienteId
-    #plan
-    #precio
-    constructor(clienteId, plan, precio, entrenadorId) {
-        super(0, 0)
-        this.#clienteId = new ObjectId(clienteId);
-        this.#plan = plan;
-        this.#precio = precio;
-        this.entrenadorId = new ObjectId(entrenadorId)
-    }
 
-    get clienteId() {
-        return this.#clienteId
-    }
-
-    get plan() {
-        return this.#plan
-    }
-
-    get precio() {
-        return this.#precio
-    }
-
-    async obtenerIngresos() {
-        const db = await conectar();
-        const coleccionSesionI = db.collection("sesionesIndividuales");
-
-        const ingresos = await coleccionSesionI.aggregate([
-            { $match: { cliente: new ObjectId(this.#clienteId) } },
-            {
-                $group: {
-                    _id: "$cliente",
-                    total: { $sum: "$precio" }
-                }
-            }
-        ]).toArray();
-
-        return ingresos
-    }
-}
 //EGRESOS
 
 //subclase servicios
