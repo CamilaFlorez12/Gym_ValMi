@@ -1,4 +1,4 @@
-import { cliente, conectar } from "./persistenciaArchivos.js";
+import {  conectar } from "./persistenciaArchivos.js";
 import { ObjectId } from "mongodb";
 import dayjs from "dayjs";
 
@@ -8,9 +8,9 @@ class Seguimiento_fisico {
         if (!ObjectId.isValid(clienteId)) throw new Error("clienteId inválido");
         if (!ObjectId.isValid(planId)) throw new Error("planId inválido");
 
-        this.clienteId = clienteId;
-        this.planId = planId;
-        this.registros = [];
+        this.clienteId = new ObjectId(clienteId);
+        this.planId = new ObjectId(planId);
+        
     }
 
     async registrarAvance({ peso, grasa, medidas, fotos = [], comentario }) {
@@ -29,11 +29,10 @@ class Seguimiento_fisico {
         if (comentario && typeof comentario !== "string") {
             throw new Error("El comentario debe ser texto.");
         }
-        const cliente = await conectar();
-        const session = cliente.client.startSession();
+        const {cliente,db} = await conectar();
+        const session = cliente.startSession();
 
         try {
-            const db = cliente;
             const seguimientos = db.collection("seguimientos"); // CREA COLECCION SEGUIMIENTOS
 
             await session.withTransaction(async () => {
@@ -58,6 +57,7 @@ class Seguimiento_fisico {
                         { clienteId: this.clienteId, planId: this.planId },
                         { session }
                     );
+                    
                 }
 
                 // Insertar registro de seguimiento
@@ -88,7 +88,7 @@ class Seguimiento_fisico {
 
     // Ver progreso cronológico
     async verProgreso() {
-        const db = await conectar();
+        const {db} = await conectar();
         const seguimientos = db.collection("seguimientos");
 
         const seguimiento = await seguimientos.findOne({
@@ -126,11 +126,10 @@ class Seguimiento_fisico {
          if (!ObjectId.isValid(registroId)) {
             throw new Error("registroId inválido");
         }
-        const cliente = await conectar();
-        const session = cliente.client.startSession();
+        const {cliente,db} = await conectar();
+        const session = cliente.startSession();
 
         try {
-            const db = cliente;
             const seguimientos = db.collection("seguimientos");
             const contratos = db.collection("contratos");
             const planes = db.collection("planEntrenamiento");

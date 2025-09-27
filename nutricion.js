@@ -1,4 +1,4 @@
-import { cliente, conectar } from "./persistenciaArchivos.js";
+import { conectar } from "./persistenciaArchivos.js";
 import Seguimiento_fisico from "./seguimiento_fisico.js";
 import { ObjectId } from "mongodb";
 
