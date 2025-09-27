@@ -9,7 +9,7 @@ db.createCollection("clientes", {
         nombre: { bsonType: "string", description: "Nombre requerido" },
         correo: { bsonType: "string", pattern: "^\\S+@\\S+\\.\\S+$", description: "Correo válido requerido" },
         documento: { bsonType: "string", description: "Documento requerido" },
-        planes: { bsonType: "array", items: { bsonType: "string" } },
+        planes: { bsonType: "string" },
         contratos: { bsonType: "array", items: { bsonType: "objectId" } },
         creadoEn: { bsonType: "date" }
       }
@@ -25,7 +25,7 @@ db.createCollection("planEntrenamiento", {
       required: ["nombre", "duracionSemanas", "metas", "nivel"],
       properties: {
         nombre: { bsonType: "string" },
-        duracionSemanas: { bsonType: "int", minimum: 1 },
+        duracionSemanas: { bsonType: "number", minimum: 1 },
         metas: { bsonType: "array", items: { bsonType: "string" } },
         nivel: { enum: ["principiante", "intermedio", "avanzado"] },
         estado: { enum: ["activo", "cancelado", "finalizado"] },
@@ -144,6 +144,7 @@ db.clientes.insertMany([
     correo: "laura.gomez@example.com",
     documento: "1002003001",
     contratos: [],
+    planes:"Plan Basico",
     creadoEn: new Date()
   },
   {
@@ -152,6 +153,7 @@ db.clientes.insertMany([
     correo: "carlos.perez@example.com",
     documento: "1002003002",
     contratos: [],
+    planes:"Plan Avanzado",
     creadoEn: new Date()
   }
 ]);

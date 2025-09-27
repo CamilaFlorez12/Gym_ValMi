@@ -23,18 +23,27 @@ class PlanEntrenamiento {
         this.#duracionSemanas = duracion;
     }
 
-    static async renovarPlan(planEntrenamientoId,nuevasSemanas) {
+    static async renovarPlan(planEntrenamientoId, nuevasSemanas) {
         // conexion con la base de datos y captura de las clases
         const db = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
+
+        const duracion = Number(nuevasSemanas);
+        if (isNaN(duracion) || duracion <= 0) throw new Error("La duración debe ser un número mayor a 0");
+
+        const plan = await coleccionPlanesEntrenamiento.findOne({ _id: new ObjectId(planEntrenamientoId) });
+        if (!plan) throw new Error("Plan no encontrado");
 
         //actualizacion del plan
         const actualizacion = await coleccionPlanesEntrenamiento.updateOne(
             { _id: new ObjectId(planEntrenamientoId) },
             {
                 $set: {
-                    duracionSemanas:nuevasSemanas,
-                    estado: "activo"
+                    duracionSemanas: duracion,
+                    estado: "activo",
+                    nombre: plan.nombre,
+                    metas: plan.metas,
+                    nivel: plan.nivel
                 },
             }
 
@@ -43,7 +52,7 @@ class PlanEntrenamiento {
         return actualizacion;
     }
 
-    static async cancelarPlan(planEntrenamientoId,clienteId) {
+    static async cancelarPlan(planEntrenamientoId, clienteId) {
         const db = await conectar();
         const session = cliente.startSession();
 
@@ -57,26 +66,26 @@ class PlanEntrenamiento {
 
                 await coleccionPlanesEntrenamiento.updateOne(
                     { _id: new ObjectId(planEntrenamientoId) },
-                    {$set: {estado: "cancelado"}},
-                    {session}
+                    { $set: { estado: "cancelado" } },
+                    { session }
                 );
                 await coleccionContratos.deleteOne(
-                    {planId: new ObjectId(planEntrenamientoId),clienteId:new ObjectId(clienteId)},
-                    {session}
+                    { planId: new ObjectId(planEntrenamientoId), clienteId: new ObjectId(clienteId) },
+                    { session }
                 );
                 await coleccionseguimientos.deleteMany(
-                    {planId: new ObjectId(planEntrenamientoId),cliente:new ObjectId(clienteId)},
-                    {session}
+                    { planId: new ObjectId(planEntrenamientoId), cliente: new ObjectId(clienteId) },
+                    { session }
                 );
                 console.log("Plan,contrato y seguimientos cancelados correctamente");
             });
 
         } catch (error) {
-            console.log("Error, rollback ejecundo",error);
-            }finally{
-                await session.endSession();
-            }
+            console.log("Error, rollback ejecundo", error);
+        } finally {
+            await session.endSession();
         }
+    }
 
     static async finalizarPlan(planEntrenamientoId) {
         const db = await conectar();

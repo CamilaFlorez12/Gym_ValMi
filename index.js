@@ -24,7 +24,7 @@ async function menuGestionClientes(db) {
                     { name: "3.Acualizar Cliente", value: "3" },
                     { name: "4.Eliminar Cliente", value: "4" },
                     { name: "5.Asignar Plan", value: "5" },
-                    { name: "6.Salir",value:"6"}
+                    { name: "6.Salir", value: "6" }
                 ]
             }])
             switch (accion.opcion) {
@@ -109,7 +109,10 @@ async function gestionPlanes() {
                     const { planEntrenamientoId } = await inquirer.prompt([
                         { type: 'input', name: 'planEntrenamientoId', message: "Ingrese el ID del plan a renovar:" }
                     ]);
-                    await PlanEntrenamiento.renovarPlan(planEntrenamientoId);
+                    const { nuevasSemanas } = await inquirer.prompt([
+                        { type: 'number', name: 'nuevasSemanas', message: "Ingrese la nueva duración en semanas:" }
+                    ]);
+                    await PlanEntrenamiento.renovarPlan(planEntrenamientoId, nuevasSemanas);
                     break;
                 case "3":
                     const { planId, clienteId } = await inquirer.prompt([
@@ -146,7 +149,7 @@ async function seguimientoFisico() {
             ]);
 
             const seguimientoFisico = new Seguimiento_fisico(clienteId, planId);
-            const accion = await inquirer.prompt([{
+            const { opcion } = await inquirer.prompt([{
                 type: 'list',
                 name: 'opcion',
                 message: 'Ingresa lo que deseas hacer:',
@@ -158,7 +161,7 @@ async function seguimientoFisico() {
                 ]
             }])
 
-            switch (accion.opcion) {
+            switch (opcion) {
                 case "1":
                     const registro = await inquirer.prompt([
                         { type: 'input', name: 'peso', message: 'Ingrese el peso:' },
@@ -167,6 +170,11 @@ async function seguimientoFisico() {
                         { type: 'input', name: 'fotos', message: 'Inserte fotos:' },
                         { type: 'input', name: 'comentario', message: 'Ingrese un comentario:' }
                     ]);
+
+                    registro.peso = parseFloat(registro.peso);
+                    registro.grasa = parseFloat(registro.grasa);
+                    registro.fotos = registro.fotos.split(',').map(f => f.trim());
+
                     await seguimientoFisico.registrarAvance(registro);
                     console.log("Seguimiento físico registrado exitosamente", seguimientoFisico);
                     break;

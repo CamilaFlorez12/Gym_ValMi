@@ -1,10 +1,12 @@
 import { cliente, conectar } from "./persistenciaArchivos.js";
 import Seguimiento_fisico from "./seguimiento_fisico.js";
+import { ObjectId } from "mongodb";
+
 
 
 class PlanAlimentacion {
     #calorias
-    constructor(clienteId, planId, alimento,descripcion, calorias, fecha) {
+    constructor(clienteId, planId, alimento, descripcion, calorias, fecha) {
         this.clienteId = clienteId;
         this.planId = planId;
         this.descripcion = descripcion;
@@ -21,20 +23,23 @@ class PlanAlimentacion {
         const db = await conectar();
         const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
 
+        const partes = this.fecha.split('-'); 
+        const fechaObj = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`); 
+
         const registro = [
             {
-                cliente: this.clienteId,
-                plan: this.planId,
+                cliente: new ObjectId(this.clienteId), 
+                plan: new ObjectId(this.planId),        
                 descripcion: this.descripcion,
-                nombre: this.alimento,
-                calorias: this.#calorias,
-                fecha: this.fecha
+                alimento: this.alimento,                
+                calorias: parseFloat(this.#calorias),  
+                fecha: fechaObj                          
             }
-        ]
+        ];
 
         await coleccionSeguimientoNutricional.insertMany(registro)
     }
-//reporte semanal de aliemtos
+    //reporte semanal de aliemtos
     static async reporteSemanal(clienteId) {
         const db = await conectar();
 
@@ -61,6 +66,6 @@ class PlanAlimentacion {
     }
 }
 
-export{PlanAlimentacion}
+export { PlanAlimentacion }
 
 

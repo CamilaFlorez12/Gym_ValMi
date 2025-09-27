@@ -40,9 +40,14 @@ export function gestionClientes(db) {
             const fechaInicio = new Date();
             const fechaFin = dayjs(fechaInicio).add(planDoc.duracionSemanas, "week").toDate();
 
+            const precio = planDoc.duracionSemanas *25000;
+
             const contrato = {
                 clienteId: cliente._id,
                 planId: planDoc._id,
+                condiciones: "Acceso estándar al plan",
+                duracionSemanas: planDoc.duracionSemanas,
+                precio: precio,
                 fechaInicio,
                 fechaFin
             };
