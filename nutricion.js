@@ -7,6 +7,14 @@ import { ObjectId } from "mongodb";
 class PlanAlimentacion {
     #calorias
     constructor(clienteId, planId, alimento, descripcion, calorias, fecha) {
+        if (!ObjectId.isValid(clienteId)) throw new Error("clienteId inválido");
+        if (!ObjectId.isValid(planId)) throw new Error("planId inválido");
+        if (!alimento || typeof alimento !== "string") throw new Error("El alimento debe ser un texto válido");
+        if (descripcion && typeof descripcion !== "string") throw new Error("La descripción debe ser texto");
+        if (typeof calorias !== "number" || calorias <= 0) throw new Error("Las calorías deben ser un número positivo");
+        if (!fecha || typeof fecha !== "string" || !/^\d{2}-\d{2}-\d{4}$/.test(fecha)) {
+            throw new Error("La fecha debe estar en formato dd-mm-yyyy");
+        }
         this.clienteId = clienteId;
         this.planId = planId;
         this.descripcion = descripcion;
@@ -23,24 +31,33 @@ class PlanAlimentacion {
         const db = await conectar();
         const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
 
-        const partes = this.fecha.split('-'); 
-        const fechaObj = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`); 
+        const partes = this.fecha.split('-');
+        const fechaObj = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+
+        if (isNaN(fechaObj.getTime())) {
+            throw new Error("Fecha inválida");
+        }
 
         const registro = [
             {
-                cliente: new ObjectId(this.clienteId), 
-                plan: new ObjectId(this.planId),        
+                cliente: new ObjectId(this.clienteId),
+                plan: new ObjectId(this.planId),
                 descripcion: this.descripcion,
-                alimento: this.alimento,                
-                calorias: parseFloat(this.#calorias),  
-                fecha: fechaObj                          
+                alimento: this.alimento,
+                calorias: this.#calorias,
+                fecha: fechaObj
             }
         ];
 
-        await coleccionSeguimientoNutricional.insertMany(registro)
+        await coleccionSeguimientoNutricional.insertMany(registro);
+        console.log("Alimento registrado correctamente");
+
     }
     //reporte semanal de aliemtos
     static async reporteSemanal(clienteId) {
+        if (!ObjectId.isValid(clienteId)) {
+            throw new Error("clienteId inválido");
+        }
         const db = await conectar();
 
         //calculo de la semana(7 dias)
@@ -50,7 +67,7 @@ class PlanAlimentacion {
         const reporte = await db.collection("seguimientoNutricional").aggregate([
             {
                 $match: {
-                    cliente: clienteId,
+                    cliente: new ObjectId(clienteId),
                     fecha: { $gte: inicioSemana }
                 }
             },
@@ -62,6 +79,12 @@ class PlanAlimentacion {
                 }
             }
         ]).toArray();
+
+        if (!reporte.length) {
+            console.log("No hay registros en la última semana");
+            return [];
+        }
+
         return reporte
     }
 }

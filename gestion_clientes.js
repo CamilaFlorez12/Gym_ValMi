@@ -10,6 +10,15 @@ export function gestionClientes(db) {
     return {
 
         async crearCliente(data) {
+            if (!data.nombre || typeof data.nombre !== "string") {
+                throw new Error("El nombre es obligatorio y debe ser un texto.");
+            }
+            if (!data.email || !data.email.includes("@")) {
+                throw new Error("El email no es válido.");
+            }
+            if (!data.telefono || data.telefono.length < 7) {
+                throw new Error("El teléfono debe tener al menos 7 dígitos.");
+            }
             const nuevo = { ...data, creadoEn: new Date(), contratos: [] };
             const { insertedId } = await clientes.insertOne(nuevo);
             return insertedId;
@@ -17,25 +26,55 @@ export function gestionClientes(db) {
 
 
         async listarClientes() {
-            return clientes.find().toArray();
+            const lista = await clientes.find().toArray();
+            if (!lista.length) {
+                console.log(" No hay clientes registrados.");
+            }
+            return lista;
         },
 
         async actualizarCliente(id, update) {
+            if (!ObjectId.isValid(id)) {
+                throw new Error("El ID proporcionado no es válido.");
+            }
+            if (!update || Object.keys(update).length === 0) {
+                throw new Error("Debe proporcionar al menos un campo para actualizar.");
+            }
             await clientes.updateOne({ _id: new ObjectId(id) }, { $set: update });
             return true;
         },
 
 
         async eliminarCliente(id) {
+            if (!ObjectId.isValid(id)) {
+                throw new Error("El ID proporcionado no es válido.");
+            }
+            const contratosActivos = await contratos.findOne({
+                clienteId: new ObjectId(id),
+                estado: "activo"
+            });
+
+            if (contratosActivos) {
+                throw new Error("No se puede eliminar un cliente con contratos activos.");
+            }
             await clientes.deleteOne({ _id: new ObjectId(id) });
             return true;
         },
 
 
         async asignarPlan(client, plan, session) {
+            if (!ObjectId.isValid(client)) {
+                throw new Error("El ID del cliente no es válido.");
+            }
+            if (!ObjectId.isValid(plan)) {
+                throw new Error("El ID del plan no es válido.");
+            }
             const cliente = await clientes.findOne({ _id: new ObjectId(client) }, { session });
             const planDoc = await planes.findOne({ _id: new ObjectId(plan) }, { session });
             if (!cliente || !planDoc) throw new Error("Cliente o plan no existe");
+            if (!planDoc.duracionSemanas || isNaN(planDoc.duracionSemanas)) {
+                throw new Error("El plan no tiene una duración válida.");
+            }
 
             const fechaInicio = new Date();
             const fechaFin = dayjs(fechaInicio).add(planDoc.duracionSemanas, "week").toDate();
@@ -49,7 +88,8 @@ export function gestionClientes(db) {
                 duracionSemanas: planDoc.duracionSemanas,
                 precio: precio,
                 fechaInicio,
-                fechaFin
+                fechaFin,
+                estado: "activo"
             };
 
             const { insertedId } = await contratos.insertOne(contrato, { session });

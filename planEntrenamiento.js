@@ -5,6 +5,18 @@ import { cliente, conectar } from "./persistenciaArchivos.js";
 class PlanEntrenamiento {
     #duracionSemanas
     constructor(nombre, duracionSemanas, metas, nivel, estado = "activo") { //estado activo predeterminado
+        if (!nombre || typeof nombre !== "string") {
+            throw new Error("El nombre del plan es obligatorio y debe ser un texto.");
+        }
+        if (!duracionSemanas || isNaN(duracionSemanas) || duracionSemanas <= 0) {
+            throw new Error("La duración debe ser un número mayor a 0.");
+        }
+        if (!Array.isArray(metas) || metas.length === 0) {
+            throw new Error("Debe incluir al menos una meta en el plan.");
+        }
+        if (!nivel || typeof nivel !== "string") {
+            throw new Error("El nivel del plan es obligatorio y debe ser un texto.");
+        }
         this.nombre = nombre;
         this.#duracionSemanas = duracionSemanas;
         this.metas = metas;
@@ -28,6 +40,9 @@ class PlanEntrenamiento {
         const db = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
 
+        if (!ObjectId.isValid(planEntrenamientoId)) {
+            throw new Error("El ID del plan no es válido.");
+        }
         const duracion = Number(nuevasSemanas);
         if (isNaN(duracion) || duracion <= 0) throw new Error("La duración debe ser un número mayor a 0");
 
@@ -53,6 +68,12 @@ class PlanEntrenamiento {
     }
 
     static async cancelarPlan(planEntrenamientoId, clienteId) {
+        if (!ObjectId.isValid(planEntrenamientoId)) {
+            throw new Error("El ID del plan no es válido.");
+        }
+        if (!ObjectId.isValid(clienteId)) {
+            throw new Error("El ID del cliente no es válido.");
+        }
         const db = await conectar();
         const session = cliente.startSession();
 
@@ -63,6 +84,8 @@ class PlanEntrenamiento {
                 const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
                 const coleccionContratos = db.collection("contratos");
                 const coleccionseguimientos = db.collection("seguimientos");
+                const plan = await coleccionPlanesEntrenamiento.findOne({ _id: new ObjectId(planEntrenamientoId) });
+                if (!plan) throw new Error("El plan no existe.");
 
                 await coleccionPlanesEntrenamiento.updateOne(
                     { _id: new ObjectId(planEntrenamientoId) },
@@ -88,9 +111,14 @@ class PlanEntrenamiento {
     }
 
     static async finalizarPlan(planEntrenamientoId) {
+        if (!ObjectId.isValid(planEntrenamientoId)) {
+            throw new Error("El ID del plan no es válido.");
+        }
         const db = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
 
+        const plan = await coleccionPlanesEntrenamiento.findOne({ _id: new ObjectId(planEntrenamientoId) });
+        if (!plan) throw new Error("El plan no existe.");
         //finalizacion del plan 
         const finalizacion = await coleccionPlanesEntrenamiento.updateOne(
             { _id: new ObjectId(planEntrenamientoId) },
@@ -107,6 +135,12 @@ class PlanEntrenamiento {
 
 class CrearPlan {
     static CrearPlan(tipo, clienteId) {
+        if (!tipo || typeof tipo !== "string") {
+            throw new Error("Debe indicar un tipo de plan válido.");
+        }
+        if (!ObjectId.isValid(clienteId)) {
+            throw new Error("El ID del cliente no es válido.");
+        }
         switch (tipo.toLowerCase()) {
             case "basico":
                 const planBasico = new PlanEntrenamiento("plan básico", 5, ["perder peso"], "principiante");

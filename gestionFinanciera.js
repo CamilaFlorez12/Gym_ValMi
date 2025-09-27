@@ -6,6 +6,8 @@ class GestionFinanciero {
     #ingresos
     #egresos
     constructor(ingresos = 0, egresos = 0) {
+        if (isNaN(ingresos) || ingresos < 0) throw new Error("Ingresos inválidos");
+        if (isNaN(egresos) || egresos < 0) throw new Error("Egresos inválidos");
         this.#ingresos = ingresos;
         this.#egresos = egresos;
     }
@@ -27,8 +29,8 @@ class GestionFinanciero {
     }
     //no perimte que sea negativo
     async actualizarIngresos(monto) {
-        if (monto < 0) {
-            throw new Error("El ingreso no puede ser negativo");
+        if (typeof monto !== "number" || isNaN(monto) || monto < 0) {
+            throw new Error("El ingreso debe ser un número válido y positivo");
         }
 
         const session = cliente.startSession();
@@ -55,7 +57,7 @@ class GestionFinanciero {
 
 
     async actualizarEgresos(monto) {
-        if (monto < 0) {
+        if (typeof monto !== "number" || isNaN(monto) || monto < 0) {
             throw new Error("El egreso no puede ser negativo");
         }
         const session = cliente.startSession();
@@ -88,7 +90,10 @@ class Mensualidades extends GestionFinanciero {
     #plan
     #precio
     constructor(clienteId, plan, precio) {
-        super(0, 0)
+        super(0, 0);
+        if (!ObjectId.isValid(clienteId)) throw new Error("clienteId inválido");
+        if (!plan) throw new Error("El plan es obligatorio");
+        if (typeof precio !== "number" || precio <= 0) throw new Error("El precio debe ser mayor a 0");
         this.#clienteId = clienteId;
         this.#plan = plan;
         this.#precio = precio;
@@ -134,7 +139,12 @@ class Servicios extends GestionFinanciero {
     #mantenimientoMaquinas
     #suplementos
     constructor(pagoEntrenadores, servicios, mantenimientoMaquinas, suplementos) {
-        super(0, 0)
+        super(0, 0);
+        for (const val of [pagoEntrenadores, servicios, mantenimientoMaquinas, suplementos]) {
+            if (typeof val !== "number" || isNaN(val) || val < 0) {
+                throw new Error("Todos los gastos deben ser números válidos y positivos");
+            }
+        }
         this.#pagoEntrenadores = pagoEntrenadores;
         this.#servicios = servicios;
         this.#mantenimientoMaquinas = mantenimientoMaquinas;
@@ -213,6 +223,10 @@ export async function balanceFinanciero() {
                 $sort: { total: -1 }
             }
         ]).toArray();
+        if (!resultados.length) {
+            console.log("No hay registros financieros");
+            return;
+        }
         console.log("total ingresos por fecha ->");
         resultados.forEach(t => {
             console.log(`Fecha: ${t._id} | Total:${t.total}`)

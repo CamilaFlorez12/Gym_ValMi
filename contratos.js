@@ -7,13 +7,27 @@ class Contrato {
     #condiciones;
     #duracionSemanas;
     #precio;
+    #estado;
     constructor(condiciones, duracionSemanas = 12, precio, fechaInicio, fechaFin) {
+        if (!condiciones || typeof condiciones !== "string") {
+            throw new Error("Las condiciones del contrato son obligatorias y deben ser texto.");
+        }
+        if (!duracionSemanas || isNaN(duracionSemanas) || duracionSemanas <= 0) {
+            throw new Error("La duración debe ser un número mayor a 0 semanas.");
+        }
+        if (!precio || isNaN(precio) || precio <= 0) {
+            throw new Error("El precio debe ser un número mayor a 0.");
+        }
+
         this.#condiciones = condiciones;
         this.#duracionSemanas = duracionSemanas;
         this.#precio = precio;
-        this.#fechaInicio = fechaInicio;
-        this.#fechaFin = fechaFin;
+        this.#fechaInicio = fechaInicio instanceof Date ? fechaInicio : new Date();;
+        this.#fechaFin = null;
+        this.#estado = "activo";
+
     }
+
 
     get fechaInicio() {
         return this.#fechaInicio;
@@ -34,35 +48,47 @@ class Contrato {
     get precio() {
         return this.#precio;
     }
-//crecaion de fecha si no hay
+    get estado() {
+        return this.#estado
+    }
+    //crecaion de fecha si no hay
     set fechaInicio(fechaInicio) {
-        if (!this.#fechaInicio) {
-            this.#fechaInicio = new Date();
-            this.#fechaInicio = fechaInicio;
+        if (!(fechaInicio instanceof Date)) {
+            throw new Error("La fecha de inicio debe ser un objeto Date válido.");
         }
+        this.#fechaInicio = fechaInicio
+        this.#fechaFin = new Date(this.#fechaInicio);
+        this.#fechaFin.setDate(this.#fechaInicio.getDate() + this.#duracionSemanas * 7);
 
     }
-// segun fecha inicio clacula la fecha fin
-    set fechaFin(fechaFin) {
+    // segun fecha inicio clacula la fecha fin
+    set fechaFin(_) {
         const fin = new Date(this.#fechaInicio);
         fin.setDate(fin.getDate() + this.#duracionSemanas * 7);
         this.#fechaFin = fin;
-        this.#fechaFin = fechaFin;
     }
 
     set condiciones(condiciones) {
+        if (!condiciones || typeof condiciones !== "string") throw new Error("Las condiciones deben ser texto válido.");
         this.#condiciones = condiciones;
     }
 
     set duracionSemanas(duracionSemanas) {
+        if (!duracionSemanas || isNaN(duracionSemanas) || duracionSemanas <= 0) {
+            throw new Error("La duración debe ser un número mayor a 0 semanas.");
+        }
         this.#duracionSemanas = duracionSemanas;
     }
 
     set precio(precio) {
+        if (!precio || isNaN(precio) || precio <= 0) throw new Error("El precio debe ser un número mayor a 0.");
         this.#precio = precio;
     }
-//creacion automatica del contrato
+    //creacion automatica del contrato
     async generarAutomaticamente(clienteId, planId) {
+        if (!ObjectId.isValid(clienteId)) throw new Error("El ID del cliente no es válido.");
+        if (!ObjectId.isValid(planId)) throw new Error("El ID del plan no es válido.");
+
         const db = await conectar();
         const coleccionClientes = db.collection("clientes");
         const coleccionEntrenamineto = db.collection("planEntrenamiento");
@@ -81,12 +107,13 @@ class Contrato {
             duracionSemanas: this.#duracionSemanas,
             precio: this.#precio,
             fechaInicio: this.#fechaInicio,
-            fechaFin: this.#fechaFin
+            fechaFin: this.#fechaFin,
+            estado: this.#estado
         });
         console.log("Contrato generado exitosamente");
         return true;
     };
-//renovacion del contrato
+    //renovacion del contrato
     async renovar(contratoId) {
         const db = await conectar();
         const coleccionContratos = db.collection("contratos");
@@ -99,9 +126,12 @@ class Contrato {
                 if (!contrato) {
                     throw new Error("El contrato no existe");
                 }
+                if (contrato.estado !== "activo") {
+                    throw new Error("Solo se puede renovar un contrato activo");
+                }
 
                 await coleccionSeguimientos.insertOne(
-                    { _id: new ObjectId(contratoId) }, { session }
+                    { contratoId: contrato._id, renovadoEn: new Date() }, { session }
 
                 )
                 const nuevaFechaInicio = new Date();
@@ -122,7 +152,7 @@ class Contrato {
                 );
             });
             console.log("contarto renovado exitosamente");
-            return renovar;
+            return true;
         } catch (error) {
             console.log("Error al renovar el contrato:", error);
             return false;
@@ -130,8 +160,9 @@ class Contrato {
             await session.endSession();
         }
     }
-//cancelacion del contrato
+    //cancelacion del contrato
     async cancelar(contratoId) {
+        if (!ObjectId.isValid(contratoId)) throw new Error("El ID del contrato no es válido.");
         const db = await conectar();
         const coleccionContratos = db.collection("contratos");
         const coleccionSeguimientos = db.collection("seguimientos");
@@ -148,11 +179,12 @@ class Contrato {
                     { contratoId: contrato._id }, { session }
                 )
                 await coleccionContratos.updateOne(
-                    { _id: contrato._id},
+                    { _id: contrato._id },
                     {
                         $set: {
                             fechaFin: new Date(),
-                            condiciones: "contrato cancelado"
+                            condiciones: "contrato cancelado",
+                            estado:"cancelado"
                         }
                     },
                     { session }
@@ -169,7 +201,7 @@ class Contrato {
         }
     }
 
-//finalizacion del contrato
+    //finalizacion del contrato
     async finalizar(contratoId) {
         const db = await conectar();
         const coleccionContratos = db.collection("contratos");
@@ -181,15 +213,14 @@ class Contrato {
                 if (!contrato) {
                     throw new Error("El contrato no existe");
                 }
-                await coleccionContratos.updateOne(
-                    { contratoId: contrato._id }, { session }
-                )
+        
                 await coleccionContratos.updateOne(
                     { _id: contrato._id },
                     {
                         $set: {
-                            fechaFin: this.#fechaFin,
-                            condiciones: "contrato finalizado"
+                            fechaFin: new Date(),
+                            condiciones: "contrato finalizado",
+                            estado:"finalizado"
                         }
                     },
                     { session }
@@ -198,9 +229,9 @@ class Contrato {
             console.log("contrato finalizado exitosamente");
             return true;
         } catch (error) {
-            console.log("Error al finalizar contrato:",error);
+            console.log("Error al finalizar contrato:", error);
             return false
-        }finally{
+        } finally {
             await session.endSession();
         }
 

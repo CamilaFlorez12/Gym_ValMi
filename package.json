@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/CamilaFlorez12/Gym_ValMi#readme",
   "dependencies": {
+    "chalk": "^5.6.2",
     "dayjs": "^1.11.18",
     "mongodb": "^6.20.0"
   }
