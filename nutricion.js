@@ -11,10 +11,10 @@ class PlanAlimentacion {
         if (!ObjectId.isValid(planId)) throw new Error("planId inválido");
         if (!alimento || typeof alimento !== "string") throw new Error("El alimento debe ser un texto válido");
         if (descripcion && typeof descripcion !== "string") throw new Error("La descripción debe ser texto");
-        if (typeof calorias !== "number" || calorias <= 0) throw new Error("Las calorías deben ser un número positivo");
-        if (!fecha || typeof fecha !== "string" || !/^\d{2}-\d{2}-\d{4}$/.test(fecha)) {
-            throw new Error("La fecha debe estar en formato dd-mm-yyyy");
-        }
+
+        calorias = Number(calorias);
+        if (isNaN(calorias) || calorias <= 0) throw new Error("Las calorías deben ser un número positivo");
+
         this.clienteId = clienteId;
         this.planId = planId;
         this.descripcion = descripcion;
@@ -28,12 +28,11 @@ class PlanAlimentacion {
     }
 
     async registrarAlimeto() {
-        const db = await conectar();
+        const {db} = await conectar(); 
         const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
 
-        const partes = this.fecha.split('-');
-        const fechaObj = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-
+        
+        const fechaObj = new Date(this.fecha);
         if (isNaN(fechaObj.getTime())) {
             throw new Error("Fecha inválida");
         }
@@ -58,7 +57,8 @@ class PlanAlimentacion {
         if (!ObjectId.isValid(clienteId)) {
             throw new Error("clienteId inválido");
         }
-        const db = await conectar();
+        const {db} = await conectar();
+        const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
 
         //calculo de la semana(7 dias)
         const inicioSemana = new Date();

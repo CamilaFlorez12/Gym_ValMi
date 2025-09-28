@@ -160,14 +160,14 @@ async function gestionPlanes() {
 
 async function seguimientoFisico() {
     let salir = false;
+    let seguimientoF = null;
+    const ids = await inquirer.prompt([
+        { type: 'input', name: 'clienteId', message: 'Ingrese el ID del cliente:' },
+        { type: 'input', name: 'planId', message: 'Ingrese el ID del plan:' }
+    ]);
+    seguimientoF = new Seguimiento_fisico(ids.clienteId, ids.planId);
     while (!salir) {
         try {
-            const { clienteId, planId } = await inquirer.prompt([
-                { type: 'input', name: 'clienteId', message: chalk.hex('#FFB6C1')(' Ingrese el ID del cliente:') },
-                { type: 'input', name: 'planId', message: chalk.hex('#FFB6C1')('Ingrese el ID del plan:') }
-            ]);
-
-            const seguimientoFisico = new Seguimiento_fisico(clienteId, planId);
             const { opcion } = await inquirer.prompt([{
                 type: 'list',
                 name: 'opcion',
@@ -194,12 +194,12 @@ async function seguimientoFisico() {
                     registro.grasa = parseFloat(registro.grasa);
                     registro.fotos = registro.fotos.split(',').map(f => f.trim());
 
-                    await seguimientoFisico.registrarAvance(registro);
+                    await seguimientoF.registrarAvance(registro);
                     console.log(chalk.hex('#FFB6C1')('Seguimiento físico registrado exitosamente'));
                     break;
                 case "2":
                     console.log(chalk.hex('#D8BFD8')('Visualizando progreso...'));
-                    await seguimientoFisico.verProgreso();
+                    await seguimientoF.verProgreso();
                     break;
                 case "3":
                     const { registroId, cancelarPlan } = await inquirer.prompt([
@@ -207,7 +207,7 @@ async function seguimientoFisico() {
                         { type: 'confirm', name: 'cancelar', message: chalk.hex('#FFB6C1')(' ¿Desea cancelar también el plan y contrato?') }
 
                     ]);
-                    await seguimientoFisico.eliminarRegistro(registroId, cancelarPlan);
+                    await seguimientoF.eliminarRegistro(registroId, cancelarPlan);
                     console.log(chalk.hex('#FF69B4')('Registro eliminado correctamente'));
                     break;
                 case "4":

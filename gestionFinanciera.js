@@ -36,7 +36,7 @@ class GestionFinanciero {
         const session = cliente.startSession();
         try {
             await session.withTransaction(async () => {
-                const db = await conectar();
+                const {db} = await conectar();
                 const finanzas = db.collection("finanzas");
 
                 this.#ingresos += monto
@@ -63,7 +63,7 @@ class GestionFinanciero {
         const session = cliente.startSession();
         try {
             await session.withTransaction(async () => {
-                const db = await conectar();
+                const {db} = await conectar();
                 const finanzas = db.collection("finanzas");
 
                 this.#egresos += monto
@@ -112,7 +112,7 @@ class Mensualidades extends GestionFinanciero {
     }
 
     async obtenerIngresos() {
-        const db = await conectar();
+        const {db} = await conectar();
         const coleccionContrato = db.collection("contratos");
 
         const ingresos = await coleccionContrato.aggregate([
@@ -171,7 +171,7 @@ class Servicios extends GestionFinanciero {
         const session = cliente.startSession();
         try {
             await session.withTransaction(async () => {
-                const db = await conectar();
+                const db = cliente.db("Gym_ValMi");
                 const coleccionGastos = db.collection("gastos");
                 const gastos = [
                     { tipo: "pagoEntrenadores", monto: this.#pagoEntrenadores, fecha: new Date() },
@@ -210,7 +210,7 @@ class Servicios extends GestionFinanciero {
 
 export async function balanceFinanciero() {
     try {
-        const db = await conectar();
+        const {db} = await conectar();
         const balance = db.collection("finanzas");
 
         const resultados = await balance.aggregate([

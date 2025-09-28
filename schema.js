@@ -27,6 +27,7 @@ db.createCollection("planEntrenamiento", {
         nombre: { bsonType: "string" },
         duracionSemanas: { bsonType: "number", minimum: 1 },
         metas: { bsonType: "array", items: { bsonType: "string" } },
+        medidas: { bsonType: ["string", "double", "object"] },
         nivel: { enum: ["principiante", "intermedio", "avanzado"] },
         estado: { enum: ["activo", "cancelado", "finalizado"] },
         clienteId: { bsonType: "objectId" }
@@ -71,11 +72,11 @@ db.createCollection("seguimientos", {
             properties: {
               _id: { bsonType: "objectId" },
               fecha: { bsonType: "date" },
-              peso: { bsonType: "double" },
-              grasa: { bsonType: "double" },
-              medidas: { bsonType: "string" },
-              fotos: { bsonType: "array", items: { bsonType: "string" } },
-              comentario: { bsonType: "string" }
+              peso: { bsonType: ["double", "int"] },        // acepta int o double
+              grasa: { bsonType: ["double", "int"] },       // acepta int o double
+              medidas: { bsonType: ["string", "double", "int", "object"] }, // <-- flexible
+              fotos: { bsonType: ["array", "null"], items: { bsonType: "string" } }, // acepta null o array
+              comentario: { bsonType: ["string", "null"] }  // opcional
             }
           }
         },
@@ -84,6 +85,7 @@ db.createCollection("seguimientos", {
     }
   }
 })
+
 
 
 db.createCollection("seguimientoNutricional", {
@@ -179,7 +181,7 @@ db.planEntrenamiento.insertMany([
 ]);
 
 // ====================== CONTRATOS ======================
-db.collection("contratos").insertMany([
+db.contratos.insertMany([
   {
     clienteId: new ObjectId("68d6e9636fe92550cf3fb1a6"),
     planId: new ObjectId("68d6e9636fe92550cf3fb1a8"),

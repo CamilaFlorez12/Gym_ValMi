@@ -8,7 +8,9 @@ export async function conectar() {
     try {
         await cliente.connect();
         console.log("conexión exitosa");
-        return cliente.db(dbName)
+        const db = cliente.db(dbName);
+        return {cliente,db};
+        
     } catch (error) {
         console.log("Error de conexión", error);
     };

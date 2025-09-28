@@ -13,12 +13,7 @@ export function gestionClientes(db) {
             if (!data.nombre || typeof data.nombre !== "string") {
                 throw new Error("El nombre es obligatorio y debe ser un texto.");
             }
-            if (!data.email || !data.email.includes("@")) {
-                throw new Error("El email no es válido.");
-            }
-            if (!data.telefono || data.telefono.length < 7) {
-                throw new Error("El teléfono debe tener al menos 7 dígitos.");
-            }
+            
             const nuevo = { ...data, creadoEn: new Date(), contratos: [] };
             const { insertedId } = await clientes.insertOne(nuevo);
             return insertedId;
