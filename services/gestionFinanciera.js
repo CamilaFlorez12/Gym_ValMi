@@ -187,15 +187,17 @@ class Servicios extends GestionFinanciero {
                 }
                     await coleccionGastos.insertMany(gastos,{session})
                     console.log("gastos registrados exitosamnte");
+
+
                     const egresos = await coleccionGastos.aggregate([
                         {
                             $group: {
-                                _id: "$tipo",
+                                _id: null,
                                 total: { $sum: "$monto" }
                             }
                         }
-                    ]).toArray();
-                    return egresos;
+                    ],{session}).toArray();
+                    return egresos.length ? egresos[0].total : 0;
                 }
             )
         } catch (error) {

@@ -103,16 +103,26 @@ async function gestionPlanes() {
                 name: 'opcion',
                 message: chalk.hex('#D8BFD8')('Ingresa y elige lo que deseas hacer:'),
                 choices: [
-                    { name: chalk.hex('#FFB6C1')("1. Mostrar Planes"), value: "1" },
-                    { name: chalk.hex('#FFB6C1')("2. Renovar Plan"), value: "2" },
-                    { name: chalk.hex('#FFB6C1')("3. Cancelar Plan"), value: "3" },
-                    { name: chalk.hex('#FFB6C1')("4. Finalizar Plan"), value: "4" },
-                    { name: chalk.hex('#FFB6C1')("5. Salir"), value: "5" }
+                    { name: chalk.hex('#FFB6C1')("1. Crear planes"), value: "1" },
+                    { name: chalk.hex('#FFB6C1')("2. Mostrar Planes"), value: "2" },
+                    { name: chalk.hex('#FFB6C1')("3. Renovar Plan"), value: "3" },
+                    { name: chalk.hex('#FFB6C1')("4. Cancelar Plan"), value: "4" },
+                    { name: chalk.hex('#FFB6C1')("5. Finalizar Plan"), value: "5" },
+                    { name: chalk.hex('#FFB6C1')("6. Salir"), value: "6" }
                 ]
             }])
             switch (accion.opcion) {
-                case "1":
-                    const db = await conectar();
+                case "1":  
+                    const { tipo, clienteId: clienteIdNuevo }  = await inquirer.prompt([
+                        { type: 'list', name: 'tipo', message: "Elige tipo de plan:", choices: ["basico", "intermedio", "avanzado"] },
+                        { type: 'input', name: 'clienteId', message: "Ingresa el ID del cliente:" }
+                    ]);
+                    const nuevoPlan = gestionPlan.CrearPlan(tipo, clienteIdNuevo);
+                    console.log("Plan creado exitosamente");
+                    break;
+
+                case "2":
+                    const { db } = await conectar();
                     const planes = await db.collection("planEntrenamiento").find().toArray();
                     console.log(chalk.hex('#D8BFD8')(' Planes disponibles:'));
                     planes.forEach((plan, index) => {
@@ -121,7 +131,7 @@ async function gestionPlanes() {
                         );
                     });
                     break;
-                case "2":
+                case "3":
                     const { planEntrenamientoId } = await inquirer.prompt([
                         { type: 'input', name: 'planEntrenamientoId', message: chalk.hex('#FFB6C1')("Ingrese el ID del plan a renovar:") }
                     ]);
@@ -131,7 +141,7 @@ async function gestionPlanes() {
                     await PlanEntrenamiento.renovarPlan(planEntrenamientoId, nuevasSemanas);
                     console.log(chalk.hex('#FF69B4').bold(`Plan renovado por ${nuevasSemanas} semanas`));
                     break;
-                case "3":
+                case "4":
                     const { planId, clienteId } = await inquirer.prompt([
                         { type: 'input', name: 'planId', message: chalk.hex('#FFB6C1')('Ingrese el ID del plan a cancelar:') },
                         { type: 'input', name: 'clienteId', message: chalk.hex('#FFB6C1')('Ingrese el ID del cliente al que le va a cancelar el plan:') }
@@ -139,14 +149,14 @@ async function gestionPlanes() {
                     await PlanEntrenamiento.cancelarPlan(planId, clienteId);
                     console.log(chalk.hex('#FF69B4')('Plan cancelado correctamente'));
                     break;
-                case "4":
+                case "5":
                     const { entrenamientoId } = await inquirer.prompt([
                         { type: 'input', name: 'entrenamientoId', message: chalk.hex('#FFB6C1')('Ingrese el ID del entrenamiento que quiere finalizar:') }
                     ]);
                     await PlanEntrenamiento.finalizarPlan(entrenamientoId);
                     console.log(chalk.hex('#FFDAB9')('Plan finalizado con éxito'));
                     break;
-                case "5":
+                case "6":
                     console.log(chalk.hex('#BA55D3')('Saliendo... ¡Hasta pronto!'));
                     salir = true
                     break;
@@ -324,6 +334,7 @@ async function gestionFinanciera() {
                     ]);
 
                     const egresos = new Servicios(pagoEntrenadores, servicios, mantenimiento, suplementos);
+                    await egresos.actualizarEgresos(pagoEntrenadores, servicios, mantenimiento, suplementos)
                     await egresos.registrarEgresos();
                     console.log(chalk.hex('#FFDAB9')('Egresos registrados correctamente'));
                     break;
@@ -349,7 +360,7 @@ async function menu() {
     let salir = false;
     while (!salir) {
         try {
-            const db = await conectar();
+            const { db } = await conectar();
 
             const respuesta = await inquirer.prompt([{
                 type: 'list',

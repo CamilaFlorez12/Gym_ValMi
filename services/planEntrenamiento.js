@@ -35,9 +35,11 @@ class PlanEntrenamiento {
         this.#duracionSemanas = duracion;
     }
 
+    
+
     static async renovarPlan(planEntrenamientoId, nuevasSemanas) {
         // conexion con la base de datos y captura de las clases
-        const db = await conectar();
+        const {db} = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
 
         if (!ObjectId.isValid(planEntrenamientoId)) {
@@ -74,7 +76,7 @@ class PlanEntrenamiento {
         if (!ObjectId.isValid(clienteId)) {
             throw new Error("El ID del cliente no es válido.");
         }
-        const db = await conectar();
+        const {db} = await conectar();
         const session = cliente.startSession();
 
         //cancelacion del plan de entrenamiento
@@ -114,7 +116,7 @@ class PlanEntrenamiento {
         if (!ObjectId.isValid(planEntrenamientoId)) {
             throw new Error("El ID del plan no es válido.");
         }
-        const db = await conectar();
+        const {db} = await conectar();
         const coleccionPlanesEntrenamiento = db.collection("planEntrenamiento");
 
         const plan = await coleccionPlanesEntrenamiento.findOne({ _id: new ObjectId(planEntrenamientoId) });
@@ -134,33 +136,50 @@ class PlanEntrenamiento {
 }
 
 class CrearPlan {
-    static CrearPlan(tipo, clienteId) {
+    static async CrearPlan(tipo, clienteId) {
         if (!tipo || typeof tipo !== "string") {
             throw new Error("Debe indicar un tipo de plan válido.");
         }
         if (!ObjectId.isValid(clienteId)) {
             throw new Error("El ID del cliente no es válido.");
         }
+
+        let nuevoPlan;
+
         switch (tipo.toLowerCase()) {
             case "basico":
-                const planBasico = new PlanEntrenamiento("plan básico", 5, ["perder peso"], "principiante");
-                planBasico.clienteId = clienteId;
-                return planBasico;
-
+                nuevoPlan = new PlanEntrenamiento("plan básico", 5, ["perder peso"], "principiante");
+                break;
             case "intermedio":
-                const planIntermedio = new PlanEntrenamiento("plan intermedio", 10, ["aumentar la fuerza", "desarrollo muscular"], "intermedio");
-                planIntermedio.clienteId = clienteId;
-                return planIntermedio;
-
+                nuevoPlan = new PlanEntrenamiento("plan intermedio", 10, ["aumentar la fuerza", "desarrollo muscular"], "intermedio");
+                break;
             case "avanzado":
-                const planAvanzado = new PlanEntrenamiento("plan avanzado", 15, ["aumentar fuerza", "mejorar agilidad y flexibilidad"], "avanzado");
-                planAvanzado.clienteId = clienteId;
-                return planAvanzado;
-
+                nuevoPlan = new PlanEntrenamiento("plan avanzado", 15, ["aumentar fuerza", "mejorar agilidad y flexibilidad"], "avanzado");
+                break;
             default:
                 throw new Error("Tipo no válido");
         }
+
+        nuevoPlan.clienteId = clienteId;
+
+     
+        const { db } = await conectar();
+        const coleccion = db.collection("planEntrenamiento");
+
+        const resultado = await coleccion.insertOne({
+            nombre: nuevoPlan.nombre,
+            duracionSemanas: nuevoPlan.duracionSemanas,
+            metas: nuevoPlan.metas,
+            nivel: nuevoPlan.nivel,
+            estado: nuevoPlan.estado,
+            clienteId: new ObjectId(clienteId),
+            fechaCreacion: new Date()
+        });
+        console.log("Plan creado exitosamente ");
+
+        return { ...nuevoPlan, _id: resultado.insertedId };
     }
 }
+
 export default PlanEntrenamiento;
 export { CrearPlan };
