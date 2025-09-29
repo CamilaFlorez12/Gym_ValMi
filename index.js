@@ -1,12 +1,12 @@
 import inquirer from 'inquirer';
-import { conectar } from './persistenciaArchivos.js';
-import { gestionClientes } from './gestion_clientes.js';
-import { GestionFinanciero, Mensualidades, Servicios, balanceFinanciero } from './gestionFinanciera.js';
-import Contrato from './contratos.js';
-import { PlanAlimentacion } from './nutricion.js';
-import { CrearPlan } from './planEntrenamiento.js';
-import PlanEntrenamiento from './planEntrenamiento.js';
-import Seguimiento_fisico from './seguimiento_fisico.js';
+import { conectar } from './utils/persistenciaArchivos.js';
+import { gestionClientes } from './services/gestion_clientes.js';
+import { GestionFinanciero, Mensualidades, Servicios, balanceFinanciero } from './services/gestionFinanciera.js';
+import Contrato from './services/contratos.js';
+import { PlanAlimentacion } from './services/nutricion.js';
+import { CrearPlan } from './services/planEntrenamiento.js';
+import PlanEntrenamiento from './services/planEntrenamiento.js';
+import Seguimiento_fisico from './services/seguimiento_fisico.js';
 import chalk from 'chalk';
 
 
