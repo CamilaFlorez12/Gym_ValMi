@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { cliente, conectar } from "./persistenciaArchivos.js";
+import { cliente, conectar } from "../utils/persistenciaArchivos.js";
 
 class Contrato {
     #fechaInicio;

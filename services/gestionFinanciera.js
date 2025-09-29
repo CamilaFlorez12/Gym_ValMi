@@ -1,4 +1,4 @@
-import { cliente, conectar } from "./persistenciaArchivos.js";
+import { cliente, conectar } from "../utils/persistenciaArchivos.js";
 import { ObjectId } from "mongodb";
 
 //clase abstracta de gestionfinanciera

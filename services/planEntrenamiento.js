@@ -1,6 +1,6 @@
 //conexión con otra carpeta que tiene la conexión con la base de datos
 import { ObjectId } from "mongodb";
-import { cliente, conectar } from "./persistenciaArchivos.js";
+import { cliente, conectar } from "../utils/persistenciaArchivos.js";
 
 class PlanEntrenamiento {
     #duracionSemanas
