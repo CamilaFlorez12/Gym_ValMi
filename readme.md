@@ -42,15 +42,27 @@ npm start
 
 ## 📂 Estructura del Proyecto
 ```
-/gym-cli-manager
-│── /models        # Modelos de datos con validaciones
-│── /services      # Lógica de negocio (clientes, planes, finanzas...)
-│── /commands      # Comandos CLI con inquirer
-│── /config        # Configuración (dotenv, conexión DB)
-│── /utils         # Utilidades y helpers
-│── app.js         # Punto de entrada principal
-│── README.md      # Documentación
-│── .gitignore     # Archivos a ignorar en git
+Gym_ValMi-main/
+├── .gitignore
+├── index.js
+├── readme.md
+├── package-lock.json
+├── package.json
+├── models
+     └── schema.js
+├── Services
+      ├── contratos.js
+      ├── gestionFinanciera.js
+      ├── gestion_clientes.js
+      ├── nutricion.js
+      ├── seguimiento_fisico.js
+      └── planEntrenamiento.js
+├── Utils
+      └── persistenciaArchivos.js
+└── multimedia/
+      ├── UML gym.webp
+      └── portada gym.png
+
 ```
 
 ---
@@ -200,14 +212,14 @@ Un diagrama UML de clases se encuentra en el directorio `/multimedia/uml`.
 - 💕 **Product Owner:** Valentina Delgado 
 - 💖 **Developers:** Camila Florez, Valentina Delgado 
 
-Los detalles completos de la planeación se encuentran en el documento PDF adjunto en `/multimedia/planeacion_scrum.pdf`.  PENDIENTE NO OLVIDAR!!!!!
-📖 [Acceder a la planeación](./docs/planeacion_scrum.pdf)
+Los detalles completos de la planeación se encuentran en el documento PDF adjunto en:  
+📖 [Acceder a la planeación](./multimedia/Gimnasio%20ValMi.pdf) 
 
 ---
 
 ## 📸💎 Video Explicativo
-Un video de máximo 7 minutos explicando la aplicación de principios SOLID y patrones de diseño, junto con ejemplos del código:  PENDIENTE NO OLVIDAR!!!!!
-💻 [Ver video](https://youtu.be/xxxxxxx)
+Un video de máximo 7 minutos explicando la aplicación de principios SOLID y patrones de diseño, junto con ejemplos del código:  
+💻 [Ver video](https://drive.google.com/file/d/1jLplpc8ec9yXNMz6pPm7-vVOkeoZZ6ft/view?usp=drivesdk)
 
 ---
 
