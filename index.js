@@ -334,7 +334,8 @@ async function gestionFinanciera() {
                     ]);
 
                     const egresos = new Servicios(pagoEntrenadores, servicios, mantenimiento, suplementos);
-                    await egresos.actualizarEgresos(pagoEntrenadores, servicios, mantenimiento, suplementos)
+                    const totalEgresos = pagoEntrenadores+servicios+mantenimiento+suplementos;
+                    await egresos.actualizarEgresos(totalEgresos);
                     await egresos.registrarEgresos();
                     console.log(chalk.hex('#FFDAB9')('Egresos registrados correctamente'));
                     break;
