@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb";
 import dayjs from "dayjs";
+import inquirer from "inquirer";
+import { historialCliente } from "./historialCliente";
 
 export function gestionClientes(db) {
     const clientes = db.collection("clientes");
@@ -96,6 +98,14 @@ export function gestionClientes(db) {
             return insertedId;
         },
 
+
+        async historialCliente(id) {
+            const cliente = await clientes.find().toArray();
+            if (!id.length) {
+                console.log(" No existe este cliente");
+            }
+            return cliente;
+        },
 
         // async cancelarPlan(contratoId, session) {
         //     const contrato = await contratos.findOne({ _id: new ObjectId(contratoId) }, { session });
