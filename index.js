@@ -8,6 +8,8 @@ import { CrearPlan } from './services/planEntrenamiento.js';
 import PlanEntrenamiento from './services/planEntrenamiento.js';
 import Seguimiento_fisico from './services/seguimiento_fisico.js';
 import chalk from 'chalk';
+import { LeerInfoClientes } from './exports/historialProgreso.js';
+import { escribirArchivo } from './exports/historialProgreso.js';
 
 
 
@@ -357,6 +359,34 @@ async function gestionFinanciera() {
 
 }
 
+async function menuReporte(){
+    let salir = false;
+    while(!salir){
+        try{
+            const {db,cliente} = await conectar();
+            const respuesta = await inquirer.prompt([{
+                type:'list',
+                name:'opcion',
+                message:chalk.hex('#D8BFD8')('Ingrese lo que desa hacer:'),
+                choices:[
+                    { name: chalk.hex('#FFB6C1')("1. Generar reporte de clientes"), value: "1" },
+                    { name: chalk.hex('#FFB6C1')("2. Salir"), value: "2" },
+                ]
+            }])
+            switch (respuesta.opcion){
+                case "1":
+                    const nombre = await inquirer.prompt([{
+                        type: "input", name: "clienteId", message: chalk.hex('#FFB6C1')(' Ingrese ID del cliente:') 
+                    }]);
+                    LeerInfoClientes();
+                    escribirArchivo(nombre);
+            }
+        }catch (error){
+            console.log(chalk.hex('#FF69B4')('Error al ejecutar menu reporte:'), error);
+        }
+    }
+}
+
 async function menu() {
     let salir = false;
     while (!salir) {
@@ -373,7 +403,8 @@ async function menu() {
                     { name: chalk.hex('#FFB6C1')("3. Seguimiento Físico"), value: "3" },
                     { name: chalk.hex('#FFB6C1')("4. Crear Plan De Nutrición"), value: "4" },
                     { name: chalk.hex('#FFB6C1')("5. Gestión Financiera"), value: "5" },
-                    { name: chalk.hex('#FFB6C1')("6. Salir"), value: "6" }
+                    { name: chalk.hex('#FFB6C1')("6. Generar reporte"), value: "6" },
+                    { name: chalk.hex('#FFB6C1')("7. Salir"), value: "7" }
                 ]
             }])
             switch (respuesta.opcion) {
@@ -393,6 +424,9 @@ async function menu() {
                     await gestionFinanciera();
                     break;
                 case "6":
+                    await menuReporte();
+                    break
+                case "7":
                     console.log(chalk.hex('#BA55D3')('Saliendo... ¡Hasta pronto!'));
                     salir = true;
                     break;
