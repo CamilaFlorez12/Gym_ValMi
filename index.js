@@ -7,7 +7,6 @@ import { PlanAlimentacion } from './services/nutricion.js';
 import { CrearPlan } from './services/planEntrenamiento.js';
 import PlanEntrenamiento from './services/planEntrenamiento.js';
 import Seguimiento_fisico from './services/seguimiento_fisico.js';
-import historialCliente from './services/historialCliente.js';
 import chalk from 'chalk';
 
 
@@ -27,7 +26,6 @@ async function menuGestionClientes(db) {
                     { name: chalk.hex('#FFB6C1')("3. Actualizar Cliente"), value: "3" },
                     { name: chalk.hex('#FFB6C1')("4. Eliminar Cliente"), value: "4" },
                     { name: chalk.hex('#FFB6C1')("5. Asignar Plan"), value: "5" },
-                    { name: chalk.hex('#FFB6C1')("6. Historial Cliente"), value: "6" }
                     { name: chalk.hex('#FFB6C1')("7. Salir"), value: "7" }
                 ]
             }])
@@ -81,11 +79,8 @@ async function menuGestionClientes(db) {
                     await gestionar.asignarPlan(clienteId, planId);
                     console.log(chalk.hex('#D8BFD8')('Plan asignado correctamente'));
                     break;
-
-                case "6":
-                    const 
                 
-                case "7":
+                case "6":
                     console.log(chalk.hex('#BA55D3')('Saliendo... ¡Hasta pronto!'));
                     salir = true;
                     break;
@@ -379,8 +374,7 @@ async function menu() {
                     { name: chalk.hex('#FFB6C1')("3. Seguimiento Físico"), value: "3" },
                     { name: chalk.hex('#FFB6C1')("4. Crear Plan De Nutrición"), value: "4" },
                     { name: chalk.hex('#FFB6C1')("5. Gestión Financiera"), value: "5" },
-                    { name: chalk.hex('#FFB6C1')("6. Historial Cliente"), value: "6" },
-                    { name: chalk.hex('#FFB6C1')("7. Salir"), value: "6" }
+                    { name: chalk.hex('#FFB6C1')("6. Salir"), value: "6" }
                 ]
             }])
             switch (respuesta.opcion) {
@@ -399,10 +393,7 @@ async function menu() {
                 case "5":
                     await gestionFinanciera();
                     break;
-             case "6":
-                    await historialCliente();
-                    break;
-                case "7":
+                case "6":
                     console.log(chalk.hex('#BA55D3')('Saliendo... ¡Hasta pronto!'));
                     salir = true;
                     break;

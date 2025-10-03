@@ -1,7 +1,6 @@
 import { ObjectId } from "mongodb";
 import dayjs from "dayjs";
 import inquirer from "inquirer";
-import { historialCliente } from "./historialCliente";
 
 export function gestionClientes(db) {
     const clientes = db.collection("clientes");
