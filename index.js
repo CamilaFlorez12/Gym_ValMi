@@ -8,8 +8,8 @@ import { CrearPlan } from './services/planEntrenamiento.js';
 import PlanEntrenamiento from './services/planEntrenamiento.js';
 import Seguimiento_fisico from './services/seguimiento_fisico.js';
 import chalk from 'chalk';
-import { LeerInfoClientes } from './exports/historialProgreso.js';
-import { escribirArchivo } from './exports/historialProgreso.js';
+import { LeerInfoClientes } from './services/historialProgreso.js';
+import { escribirArchivo } from './services/historialProgreso.js';
 
 
 
@@ -114,8 +114,8 @@ async function gestionPlanes() {
                 ]
             }])
             switch (accion.opcion) {
-                case "1":  
-                    const { tipo, clienteId: clienteIdNuevo }  = await inquirer.prompt([
+                case "1":
+                    const { tipo, clienteId: clienteIdNuevo } = await inquirer.prompt([
                         { type: 'list', name: 'tipo', message: "Elige tipo de plan:", choices: ["basico", "intermedio", "avanzado"] },
                         { type: 'input', name: 'clienteId', message: "Ingresa el ID del cliente:" }
                     ]);
@@ -336,7 +336,7 @@ async function gestionFinanciera() {
                     ]);
 
                     const egresos = new Servicios(pagoEntrenadores, servicios, mantenimiento, suplementos);
-                    const totalEgresos = pagoEntrenadores+servicios+mantenimiento+suplementos;
+                    const totalEgresos = pagoEntrenadores + servicios + mantenimiento + suplementos;
                     await egresos.actualizarEgresos(totalEgresos);
                     await egresos.registrarEgresos();
                     console.log(chalk.hex('#FFDAB9')('Egresos registrados correctamente'));
@@ -359,30 +359,39 @@ async function gestionFinanciera() {
 
 }
 
-async function menuReporte(){
+async function menuReporte() {
     let salir = false;
-    while(!salir){
-        try{
-            const {db,cliente} = await conectar();
-            const respuesta = await inquirer.prompt([{
-                type:'list',
-                name:'opcion',
-                message:chalk.hex('#D8BFD8')('Ingrese lo que desa hacer:'),
-                choices:[
-                    { name: chalk.hex('#FFB6C1')("1. Generar reporte de clientes"), value: "1" },
-                    { name: chalk.hex('#FFB6C1')("2. Salir"), value: "2" },
+    while (!salir) {
+        try {
+            const { opcion } = await inquirer.prompt([{
+                type: 'list',
+                name: 'opcion',
+                message: chalk.hex('#D8BFD8')("Selecciona la ocpion que desea ejecutar:"),
+                choices: [
+                    { name: chalk.hex('#FFB6C1')('1.GEnerar reporte de cliente'), value: "1" },
+                    { name: chalk.hex('#FFB6C1')('2. Salir'), value: "2" },
                 ]
-            }])
-            switch (respuesta.opcion){
+            }]);
+            switch (opcion) {
                 case "1":
-                    const nombre = await inquirer.prompt([{
-                        type: "input", name: "clienteId", message: chalk.hex('#FFB6C1')(' Ingrese ID del cliente:') 
-                    }]);
-                    LeerInfoClientes();
-                    escribirArchivo(nombre);
+                    const informacion=await inquirer.prompt([{
+                        type:"input",
+                        name:"nombre",
+                        message:"Ingrese el nombre del cliente a generar el reporte:"
+                    }])
+                    if(!informacion.nombre){
+                        console.log("Error, el cliente no existe")
+                    }
+                    console.log(chalk.hex('#FFDAB9')(" Generando reporte de clientes..."));
+                    const clientes = await LeerInfoClientes(); 
+                    console.log(clientes);
+                    break
+                case "2":
+                    salir = true;
+                    break;
             }
-        }catch (error){
-            console.log(chalk.hex('#FF69B4')('Error al ejecutar menu reporte:'), error);
+        } catch (error) {
+            console.log(chalk.hex('#FF69B4')('Error al gestionar menu reporte:'), error);
         }
     }
 }

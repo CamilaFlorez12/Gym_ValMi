@@ -1,6 +1,7 @@
 import { conectar } from "../utils/persistenciaArchivos.js";
 import { ObjectId } from "mongodb";
 import dayjs from "dayjs";
+import { escribirArchivo } from "./historialProgreso.js";
 
 
 class Seguimiento_fisico {
@@ -88,6 +89,13 @@ try {
             { $push: { registros: registro } },
             { session }
         );
+
+        const seguimientoActualizado = await seguimientos.findOne(
+            {_id: seguimiento._id},
+            {session}
+        );
+
+        await escribirArchivo(seguimientoActualizado);
     });
 
     console.log("Avance registrado correctamente.");

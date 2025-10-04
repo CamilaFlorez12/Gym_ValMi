@@ -1,6 +1,7 @@
 import { conectar } from "../utils/persistenciaArchivos.js";
 import Seguimiento_fisico from "./seguimiento_fisico.js";
 import { ObjectId } from "mongodb";
+import { escribirArchivo } from "./historialProgreso.js";
 
 
 
@@ -28,10 +29,10 @@ class PlanAlimentacion {
     }
 
     async registrarAlimeto() {
-        const {db} = await conectar(); 
+        const { db } = await conectar();
         const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
 
-        
+
         const fechaObj = new Date(this.fecha);
         if (isNaN(fechaObj.getTime())) {
             throw new Error("Fecha inválida");
@@ -51,13 +52,23 @@ class PlanAlimentacion {
         await coleccionSeguimientoNutricional.insertMany(registro);
         console.log("Alimento registrado correctamente");
 
+        await escribirArchivo({
+            tipo: "registroNutricional",
+            clienteId: this.clienteId,
+            planId: this.planId,
+            alimento: this.alimento,
+            calorias: this.#calorias,
+            fecha: fechaObj,
+            descripcion: this.descripcion
+        });
+
     }
     //reporte semanal de aliemtos
     static async reporteSemanal(clienteId) {
         if (!ObjectId.isValid(clienteId)) {
             throw new Error("clienteId inválido");
         }
-        const {db} = await conectar();
+        const { db } = await conectar();
         const coleccionSeguimientoNutricional = db.collection("seguimientoNutricional");
 
         //calculo de la semana(7 dias)
@@ -84,7 +95,13 @@ class PlanAlimentacion {
             console.log("No hay registros en la última semana");
             return [];
         }
-
+        
+        await escribirArchivo({
+            tipo: "reporteSemanalNutricion",
+            clienteId,
+            inicioSemana,
+            datos: reporte
+        });
         return reporte
     }
 }
